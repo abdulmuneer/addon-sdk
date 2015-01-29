@@ -2,14 +2,23 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import absolute_import
 
 import os, shutil
-import simplejson as json
 import unittest
 import hashlib
 import base64
-from cuddlefish import preflight
-from StringIO import StringIO
+import sys
+PY3 = sys.version[0]=='3'
+if PY3:
+    from io import StringIO
+else:
+    from StringIO import StringIO
+
+from ... import simplejson as json
+from ...cuddlefish import preflight
 
 class Util(unittest.TestCase):
     def get_basedir(self):

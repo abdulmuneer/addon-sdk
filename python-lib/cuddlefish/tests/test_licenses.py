@@ -2,7 +2,9 @@
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
-
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import absolute_import
 import unittest
 import os.path
 
@@ -68,10 +70,10 @@ class Licenses(unittest.TestCase):
             self.scan_file(from_sdk_top(fn))
 
         if self.missing:
-            print
-            print "The following files are missing an MPL2 header:"
+            print()
+            print("The following files are missing an MPL2 header:")
             for fn in sorted(self.missing):
-                print " "+fn
+                print(" "+fn)
             self.fail("%d files are missing an MPL2 header" % len(self.missing))
 
     def scan(self, start, extensions=[], skipdirs=[]):

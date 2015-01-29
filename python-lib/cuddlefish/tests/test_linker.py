@@ -1,15 +1,22 @@
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
-
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import absolute_import
 import os.path
 import shutil
 import zipfile
-from StringIO import StringIO
-import simplejson as json
+import sys
+PY3 = sys.version[0]=='3'
+if PY3:
+    from io import StringIO
+else:
+    from StringIO import StringIO
+from ... import simplejson as json
 import unittest
-import cuddlefish
-from cuddlefish import packaging, manifest
+from ... import cuddlefish
+from ...cuddlefish import packaging, manifest
 
 def up(path, generations=1):
     for i in range(generations):
@@ -69,7 +76,7 @@ class Basic(unittest.TestCase):
             # "sdk/tabs.js" mapped to "sdk/tabs", but without,
             # we just get the default (identity) mapping
             assertReqIs("main", "sdk/tabs.js", "sdk/tabs.js")
-        except Exception, e:
+        except Exception as e:
             self.fail("Must not throw from build_manifest() if modules are missing")
 
         # now, because .dependencies *is* provided, we won't search 'deps',
@@ -163,7 +170,7 @@ class Contents(unittest.TestCase):
                 # regrettably, run() always finishes with sys.exit()
                 cuddlefish.run(["xpi", "--no-strip-xpi"],
                                stdout=stdout)
-            except SystemExit, e:
+            except SystemExit as e:
                 self.failUnlessEqual(e.args[0], 0)
             zf = zipfile.ZipFile("seven.xpi", "r")
             hopts = json.loads(zf.read("harness-options.json"))
@@ -181,7 +188,7 @@ class Contents(unittest.TestCase):
                 # regrettably, run() always finishes with sys.exit()
                 cuddlefish.run(["xpi", "--no-strip-xpi"],
                                stdout=stdout)
-            except SystemExit, e:
+            except SystemExit as e:
                 self.failUnlessEqual(e.args[0], 0)
             zf = zipfile.ZipFile("one.xpi", "r")
             hopts = json.loads(zf.read("harness-options.json"))
@@ -200,7 +207,7 @@ class Contents(unittest.TestCase):
                 # regrettably, run() always finishes with sys.exit()
                 cuddlefish.run(["xpi"], # --strip-xpi is now the default
                                stdout=stdout)
-            except SystemExit, e:
+            except SystemExit as e:
                 self.failUnlessEqual(e.args[0], 0)
             zf = zipfile.ZipFile("seven.xpi", "r")
             names = zf.namelist()
@@ -229,7 +236,7 @@ class Contents(unittest.TestCase):
                 # regrettably, run() always finishes with sys.exit()
                 cuddlefish.run(["xpi", "--no-strip-xpi"],
                                stdout=stdout)
-            except SystemExit, e:
+            except SystemExit as e:
                 self.failUnlessEqual(e.args[0], 0)
             zf = zipfile.ZipFile("seven.xpi", "r")
             names = zf.namelist()

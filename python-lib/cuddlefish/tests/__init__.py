@@ -2,6 +2,10 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import absolute_import
+
 import os
 import unittest
 import doctest
@@ -10,11 +14,11 @@ import glob
 env_root = os.environ['CUDDLEFISH_ROOT']
 
 def get_tests():
-    import cuddlefish
-    import cuddlefish.tests
+    from ... import cuddlefish
+    from .. import tests as cuddlefish_tests
 
     tests = []
-    packages = [cuddlefish, cuddlefish.tests]
+    packages = [cuddlefish, cuddlefish_tests]
     for package in packages:
         path = os.path.abspath(package.__path__[0])
         pynames = glob.glob(os.path.join(path, '*.py'))

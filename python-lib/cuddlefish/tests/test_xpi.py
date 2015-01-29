@@ -2,16 +2,20 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import absolute_import
+
 import os
 import unittest
 import zipfile
 import pprint
 import shutil
 
-import simplejson as json
-from cuddlefish import xpi, packaging, manifest, buildJID
-from cuddlefish.tests import test_packaging
-from test_linker import up
+from ...import simplejson as json
+from ...cuddlefish import xpi, packaging, manifest, buildJID
+from ...cuddlefish.tests import test_packaging
+from .test_linker import up
 
 import xml.etree.ElementTree as ElementTree
 
@@ -276,7 +280,7 @@ def document_zip_file(path):
             contents = pprint.pformat(contents)
             lines = contents.splitlines()
         contents = "\n  ".join(lines)
-        print "%s:\n  %s" % (normpath(name), contents)
+        print("%s:\n  %s" % (normpath(name), contents) )
     zip.close()
 
 def document_dir_files(path):
@@ -291,8 +295,8 @@ def document_dir_files(path):
             filename_contents_tuples.append((normpath(relfilename), contents))
     filename_contents_tuples.sort()
     for filename, contents in filename_contents_tuples:
-        print "%s:" % filename
-        print "  %s" % contents
+        print("%s:" % filename)
+        print("  %s" % contents)
 
 def create_xpi(xpiname, pkg_name='aardvark', dirname='static-files',
                extra_harness_options={}):

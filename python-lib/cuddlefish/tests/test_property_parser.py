@@ -2,9 +2,17 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-import unittest
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import absolute_import
 
-from cuddlefish.property_parser import parse, MalformedLocaleFileError
+import unittest
+import sys
+PY3 = sys.version[0]=='3'
+if PY3:
+    unicode = str
+
+from ...cuddlefish.property_parser import parse, MalformedLocaleFileError
 
 class TestParser(unittest.TestCase):
 

@@ -1,12 +1,22 @@
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import absolute_import
 
 import os, unittest, shutil
 import zipfile
-from StringIO import StringIO
-from cuddlefish import initializer
-from cuddlefish.templates import TEST_MAIN_JS, PACKAGE_JSON
+import sys
+
+PY3 = sys.version[0]=='3'
+if PY3:
+    from io import StringIO
+else:
+    from StringIO import StringIO
+
+from ...cuddlefish import initializer
+from ...cuddlefish.templates import TEST_MAIN_JS, PACKAGE_JSON
 
 tests_path = os.path.abspath(os.path.dirname(__file__))
 
@@ -152,13 +162,13 @@ class TestCfxQuits(unittest.TestCase):
         sys.stderr = err = StringIO()
         rc = 0
         try:
-            import cuddlefish
+            from ... import cuddlefish
             args = list(command)
             # Pass arguments given to cfx so that cfx can find firefox path
             # if --binary option is given:
             args.extend(sys.argv[1:])
             cuddlefish.run(arguments=args)
-        except SystemExit, e:
+        except SystemExit as e:
             if "code" in e:
                 rc = e.code
             elif "args" in e and len(e.args)>0:
