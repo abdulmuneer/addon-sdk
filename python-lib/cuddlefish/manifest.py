@@ -2,11 +2,18 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import absolute_import
 import os, sys, re, hashlib
-import simplejson as json
+from .. import simplejson as json
 SEP = os.path.sep
-from cuddlefish.util import filter_filenames, filter_dirnames
+from .util import filter_filenames, filter_dirnames
+
+PY3 = sys.version[0]=='3'
+if PY3:
+    unicode = str
+    basestring = (str, bytes) #based on https://github.com/oxplot/fysom/issues/1
 
 # Load new layout mapping hashtable
 path = os.path.join(os.environ.get('CUDDLEFISH_ROOT'), "mapping.json")
@@ -253,9 +260,9 @@ class ManifestBuilder:
 
 
     def get_module_entries(self):
-        return frozenset(self.manifest.values())
+        return frozenset(list(self.manifest.values()))
     def get_data_entries(self):
-        return frozenset(self.datamaps.values())
+        return frozenset(list(self.datamaps.values()))
 
     def get_used_packages(self):
         used = set()
@@ -270,7 +277,7 @@ class ManifestBuilder:
         need to add the loader, off-manifest files that it needs, and
         generated metadata.
         """
-        for datamap in self.datamaps.values():
+        for datamap in list(self.datamaps.values()):
             for (zipname, absname) in datamap.files_to_copy:
                 yield absname
 
@@ -423,7 +430,7 @@ class ManifestBuilder:
                     if not self.abort_on_missing:
                         # print a warning, but tolerate missing modules
                         # unless cfx --abort-on-missing-module flag was set
-                        print >>self.stderr, "Warning: missing module: %s" % reqname
+                        print("Warning: missing module: %s" % reqname, file=self.stderr)
                         me.add_requirement(reqname, reqname)
                         continue
                     lineno = locations.get(reqname) # None means define()
@@ -534,11 +541,11 @@ class ManifestBuilder:
             # (target_cfg is the package.json file)
             if not "ignore-deprecated-path" in self.target_cfg:
                 lineno = locations.get(original_reqname)
-                print >>self.stderr, "Warning: Use of deprecated require path:"
-                print >>self.stderr, "  In %s:%d:" % (from_module.js, lineno)
-                print >>self.stderr, "    require('%s')." % original_reqname
-                print >>self.stderr, "  New path should be:"
-                print >>self.stderr, "    require('%s')" % reqname
+                print("Warning: Use of deprecated require path:", file=self.stderr)
+                print("  In %s:%d:" % (from_module.js, lineno), file=self.stderr)
+                print("    require('%s')." % original_reqname, file=self.stderr)
+                print("  New path should be:", file=self.stderr)
+                print("    require('%s')" % reqname, file=self.stderr)
 
             return self._search_packages_for_module(from_pkg,
                                                     lookfor_sections, reqname,
@@ -764,7 +771,7 @@ def scan_for_bad_chrome(fn, lines, stderr):
             old_chrome_lines.append( (lineno+1, line) )
 
     if old_chrome:
-        print >>stderr, """
+        print("""
 The following lines from file %(fn)s:
 %(lines)s
 use 'Components' to access chrome authority. To do so, you need to add a
@@ -779,7 +786,7 @@ Then you can use any shortcuts to its properties that you import from the
 """ % { "fn": fn, "needs": ",".join(sorted(old_chrome)),
         "lines": "\n".join([" %3d: %s" % (lineno,line)
                             for (lineno, line) in old_chrome_lines]),
-        }
+        }, file=stderr)
         problems = True
     return problems
 
@@ -798,10 +805,10 @@ def scan_module(fn, lines, stderr=sys.stderr):
 if __name__ == '__main__':
     for fn in sys.argv[1:]:
         requires, problems, locations = scan_module(fn, open(fn).readlines())
-        print
-        print "---", fn
+        print()
+        print("---", fn)
         if problems:
-            print "PROBLEMS"
+            print("PROBLEMS")
             sys.exit(1)
-        print "requires: %s" % (",".join(sorted(requires.keys())))
-        print "locations: %s" % locations
+        print("requires: %s" % (",".join(sorted(requires.keys()))))
+        print("locations: %s" % locations)

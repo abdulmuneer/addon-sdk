@@ -1,9 +1,14 @@
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
-
+import sys
 import re
 import codecs
+
+PY3 = sys.version[0]=='3'
+if PY3:
+    unicode = str
+    basestring = (str, bytes) #based on https://github.com/oxplot/fysom/issues/1
 
 class MalformedLocaleFileError(Exception):
     pass
@@ -14,7 +19,7 @@ def parse_file(path):
 def read_file(path):
     try:
         return codecs.open( path, "r", "utf-8" ).readlines()
-    except UnicodeDecodeError, e:
+    except UnicodeDecodeError as e:
         raise MalformedLocaleFileError(
           'Following locale file is not a valid ' +
           'UTF-8 file: %s\n%s"' % (path, str(e)))
@@ -56,10 +61,10 @@ def parse(lines, path=None):
             val = val[:-1]
             try:
                 # remove spaces before/after and especially the \n at EOL
-                line = lines.next().strip()
+                line = next(lines).strip()
                 while line.endswith("\\"):
                     val += line[:-1].lstrip()
-                    line = lines.next()
+                    line = next(lines)
                     lineNo += 1
                 val += line.strip()
             except StopIteration:

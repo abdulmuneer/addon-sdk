@@ -15,8 +15,45 @@
 
 import re
 import sys
+print(sys.version)
+PY3 = sys.version[0]=='3'
 
-class VersionPart(object):
+def _cmp(a,b): #implementing a cmp similar to python2 function to support python 3
+    try:
+        if a==b:
+            r = 0
+        elif a>b:
+            r = 1
+        else:
+            r = -1
+        return r
+    except Exception:
+        print("ERROR in comparing : ", a , "and ", b)
+        raise
+
+if PY3:
+    cmp = _cmp
+    MAXINT = sys.maxsize
+else:
+    MAXINT = sys.maxint
+
+#the below is taken from http://python3porting.com/preparing.html#use-rich-comparison-operators
+class ComparableMixin(object):
+    '''
+    mixin class is used to provide comparison methods.
+    '''
+    def _compare(self, other, method):
+        try:
+            return method(self._cmpkey(), other._cmpkey())
+        except (AttributeError, TypeError):
+            # _cmpkey not implemented, or return different type,
+            # so I can't compare with "other".
+            return NotImplemented
+
+
+
+
+class VersionPart():
     '''
     Examples:
 
@@ -35,7 +72,7 @@ class VersionPart(object):
       >>> VersionPart('1+')
       (2, 'pre', 0, None)
 
-      >>> VersionPart('*').numA == sys.maxint
+      >>> VersionPart('*').numA == MAXINT
       True
 
       >>> VersionPart('1') < VersionPart('2')
@@ -82,7 +119,7 @@ class VersionPart(object):
             return
 
         if part == '*':
-            self.numA = sys.maxint
+            self.numA = MAXINT
         else:
             match = self._int_part.match(part)
             self.numA = int(match.group(1))
@@ -104,6 +141,30 @@ class VersionPart(object):
                 self.extraD = match.group(2) or None
                 self.strB = self.strB[:num_found]
 
+    def __lt__(self, other):
+        r = self.__cmp(other)
+        return True if r<0 else False
+
+    def __le__(self, other):
+        r = self.__cmp(other)
+        return True if r<=0 else False
+
+    def __eq__(self, other):
+        r = self.__cmp(other)
+        return True if r==0 else False
+
+    def __ge__(self, other):
+        r = self.__cmp(other)
+        return True if r>=0 else False
+
+    def __gt__(self, other):
+        r = self.__cmp(other)
+        return True if r>0 else False
+
+    def __ne__(self, other):
+        r = self.__cmp(other)
+        return True if r!=0 else False
+
     def _strcmp(self, str1, str2):
         # Any string is *before* no string.
         if str1 is None:
@@ -117,7 +178,7 @@ class VersionPart(object):
 
         return cmp(str1, str2)
 
-    def __cmp__(self, other):
+    def __cmp(self, other): # moved the comparison from __cmp__ to rich comparison methods of new style classes
         r = cmp(self.numA, other.numA)
         if r:
             return r
@@ -133,6 +194,7 @@ class VersionPart(object):
         return self._strcmp(self.extraD, other.extraD)
 
     def __repr__(self):
+        #return ' : '.join( (self.__class__.__name__, repr((self.numA, self.strB, self.numC, self.extraD))) )
         return repr((self.numA, self.strB, self.numC, self.extraD))
 
 def compare(a, b):

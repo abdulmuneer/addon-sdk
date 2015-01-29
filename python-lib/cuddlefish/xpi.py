@@ -2,10 +2,12 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+from __future__ import absolute_import
+
 import os
 import zipfile
-import simplejson as json
-from cuddlefish.util import filter_filenames, filter_dirnames
+from .. import simplejson as json
+from .util import filter_filenames, filter_dirnames
 
 class HarnessOptionAlreadyDefinedError(Exception):
     """You cannot use --harness-option on keys that already exist in
@@ -18,7 +20,8 @@ def make_zipfile_path(localroot, localpath):
 
 def mkzipdir(zf, path):
     dirinfo = zipfile.ZipInfo(path)
-    dirinfo.external_attr = int("040755", 8) << 16L
+    #dirinfo.external_attr = int("040755", 8) << 16L #incompatible with python3
+    dirinfo.external_attr = int("040755", 8) << 16
     zf.writestr(dirinfo, "")
 
 def build_xpi(template_root_dir, manifest, xpi_path,
@@ -126,13 +129,13 @@ def build_xpi(template_root_dir, manifest, xpi_path,
         # Be carefull about strings, we need to always ensure working with UTF-8
         jsonStr = json.dumps(locale, indent=1, sort_keys=True, ensure_ascii=False)
         info = zipfile.ZipInfo('locale/' + language + '.json')
-        info.external_attr = 0644 << 16L
+        info.external_attr = 27525120 # same as 0644 << 16L in python 2 which is a syntax error in py3 for leading 0
         zf.writestr(info, jsonStr.encode( "utf-8" ))
     del harness_options['locale']
 
     jsonStr = json.dumps(locales_json_data, ensure_ascii=True) +"\n"
     info = zipfile.ZipInfo('locales.json')
-    info.external_attr = 0644 << 16L
+    info.external_attr = 27525120 # same as 0644 << 16 in python 2 which is a syntax error in py3 for leading 0
     zf.writestr(info, jsonStr.encode("utf-8"))
 
     # now figure out which directories we need: all retained files parents

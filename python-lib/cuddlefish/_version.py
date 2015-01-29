@@ -12,29 +12,35 @@
 git_refnames = "$Format:%d$"
 git_full = "$Format:%H$"
 
-
+import sys
+import re
+import os.path
 import subprocess
+
+
+
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import absolute_import
 
 def run_command(args, cwd=None, verbose=False):
     try:
         # remember shell=False, so use git.cmd on windows, not just git
         p = subprocess.Popen(args, stdout=subprocess.PIPE, cwd=cwd)
-    except EnvironmentError, e:
+    except EnvironmentError as e:
         if verbose:
-            print "unable to run %s" % args[0]
-            print e
+            print("unable to run %s" % args[0])
+            print(e)
         return None
     stdout = p.communicate()[0].strip()
     if p.returncode != 0:
         if verbose:
-            print "unable to run %s (error)" % args[0]
+            print("unable to run %s (error)" % args[0])
         return None
     return stdout
 
 
-import sys
-import re
-import os.path
+
 
 def get_expanded_variables(versionfile_source):
     """
@@ -117,7 +123,7 @@ def versions_from_vcs(tag_prefix, versionfile_source, verbose=False):
         return {}
     if not stdout.startswith(tag_prefix):
         if verbose:
-            print "tag '%s' doesn't start with prefix '%s'" % (stdout, tag_prefix)
+            print("tag '%s' doesn't start with prefix '%s'" % (stdout, tag_prefix))
         return {}
     tag = stdout[len(tag_prefix):]
     stdout = run_command([GIT, "rev-parse", "HEAD"], cwd=root)
@@ -153,7 +159,7 @@ def versions_from_parentdir(parentdir_prefix, versionfile_source, verbose=False)
     dirname = os.path.basename(root)
     if not dirname.startswith(parentdir_prefix):
         if verbose:
-            print "dirname '%s' doesn't start with prefix '%s'" %                   (dirname, parentdir_prefix)
+            print("dirname '%s' doesn't start with prefix '%s'" %(dirname, parentdir_prefix))
         return None
     return {"version": dirname[len(parentdir_prefix):], "full": ""}
 

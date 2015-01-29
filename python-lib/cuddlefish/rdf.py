@@ -2,9 +2,21 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import absolute_import
+import sys
+PY3 = sys.version[0]=='3'
 import os
 import xml.dom.minidom
-import StringIO
+if PY3:
+    from io import StringIO
+else:
+    from StringIO import StringIO
+
+if PY3:
+    unicode = str
+    basestring = (str, bytes) #based on https://github.com/oxplot/fysom/issues/1
 
 RDF_NS = "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
 EM_NS = "http://www.mozilla.org/2004/em-rdf#"
@@ -26,7 +38,7 @@ class RDF(object):
         #
         # Also see: https://bugzilla.mozilla.org/show_bug.cgi?id=567660
 
-        buf = StringIO.StringIO()
+        buf = StringIO()
         self.dom.writexml(buf, encoding="utf-8")
         return buf.getvalue().encode('utf-8')
 
@@ -194,7 +206,7 @@ def gen_manifest(template_root_dir, target_cfg, jid,
     return manifest
 
 if __name__ == "__main__":
-    print "Running smoke test."
+    print("Running smoke test.")
     root = os.path.join(os.path.dirname(__file__), '../../app-extension')
     manifest = gen_manifest(root, {'name': 'test extension'},
                             'fakeid', 'http://foo.com/update.rdf')
@@ -206,4 +218,4 @@ if __name__ == "__main__":
             raise Exception("tag does not exist: %s" % tagname)
         if not update.dom.getElementsByTagName(tagname)[0].firstChild:
             raise Exception("tag has no children: %s" % tagname)
-    print "Success!"
+    print("Success!")

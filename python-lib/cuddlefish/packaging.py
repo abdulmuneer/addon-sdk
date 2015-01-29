@@ -2,13 +2,22 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import absolute_import
+
 import os
 import sys
 import re
 import copy
 
-import simplejson as json
-from cuddlefish.bunch import Bunch
+from .. import simplejson as json
+from .bunch import Bunch
+
+PY3 = sys.version[0]=='3'
+if PY3:
+    unicode = str
+    basestring = (str, bytes) #based on https://github.com/oxplot/fysom/issues/1
 
 MANIFEST_NAME = 'package.json'
 DEFAULT_LOADER = 'addon-sdk'
@@ -164,9 +173,8 @@ def load_json_file(path):
     data = open(path, 'r').read()
     try:
         return Bunch(json.loads(data))
-    except ValueError, e:
-        raise MalformedJsonFileError('%s when reading "%s"' % (str(e),
-                                                               path))
+    except ValueError as e:
+        raise MalformedJsonFileError('%s when reading "%s"' % (str(e),path))
 
 def get_config_in_dir(path):
     package_json = os.path.join(path, MANIFEST_NAME)
@@ -319,8 +327,8 @@ def generate_build_for_target(pkg_cfg, target, deps,
                 # ensure that package name is valid
                 try:
                     validate_resource_hostname(cfg.name)
-                except ValueError, err:
-                    print err
+                except ValueError as err:
+                    print(err)
                     sys.exit(1)
                 # ensure that this package has an entry
                 if not cfg.name in build.packages:
@@ -344,11 +352,11 @@ def generate_build_for_target(pkg_cfg, target, deps,
             if os.path.isfile(fullpath) and filename.endswith('.properties'):
                 language = filename[:-len('.properties')]
 
-                from property_parser import parse_file, MalformedLocaleFileError
+                from .property_parser import parse_file, MalformedLocaleFileError
                 try:
                     content = parse_file(fullpath)
-                except MalformedLocaleFileError, msg:
-                    print msg[0]
+                except MalformedLocaleFileError as msg:
+                    print(msg[0])
                     sys.exit(1)
 
                 # Merge current locales into global locale hashtable.
@@ -453,7 +461,7 @@ def call_plugins(pkg_cfg, deps):
 def call_cmdline_tool(env_root, pkg_name):
     pkg_cfg = build_config(env_root, Bunch(name='dummy'))
     if pkg_name not in pkg_cfg.packages:
-        print "This tool requires the '%s' package." % pkg_name
+        print("This tool requires the '%s' package." % pkg_name)
         sys.exit(1)
     cfg = pkg_cfg.packages[pkg_name]
     for dirname in resolve_dirs(cfg, cfg['python-lib']):

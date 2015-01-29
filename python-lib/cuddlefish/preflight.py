@@ -2,9 +2,14 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import absolute_import
+from __future__ import division
+
 import os, sys
 import base64
-import simplejson as json
+from .. import simplejson as json
 
 def create_jid():
     """Return 'jid1-XYZ', where 'XYZ' is a randomly-generated string. (in the
@@ -43,7 +48,7 @@ def create_jid():
     # the one-in-a-million margin to get 80 bits)
 
     # if length were no issue, we'd prefer to use this:
-    h = os.urandom(80/8)
+    h = os.urandom(80//8)
     s = base64.b64encode(h, "AB").strip("=")
     jid = "jid1-" + s
     return jid
@@ -53,7 +58,7 @@ def preflight_config(target_cfg, filename, stderr=sys.stderr):
     config = json.load(open(filename, 'r'))
 
     if "id" not in config:
-        print >>stderr, ("No 'id' in package.json: creating a new ID for you.")
+        print(("No 'id' in package.json: creating a new ID for you."), file=stderr)
         jid = create_jid()
         config["id"] = jid
         modified = True
