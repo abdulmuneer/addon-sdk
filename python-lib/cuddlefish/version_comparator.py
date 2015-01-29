@@ -15,7 +15,6 @@
 
 import re
 import sys
-print(sys.version)
 PY3 = sys.version[0]=='3'
 
 def _cmp(a,b): #implementing a cmp similar to python2 function to support python 3
