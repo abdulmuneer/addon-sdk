@@ -2,23 +2,30 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import absolute_import
+
 import os
 import sys
 import copy
 import tempfile
 import signal
-import commands
+#import commands #unused import commented out. This is deprecated anyway.
 import zipfile
 import optparse
-import killableprocess
 import subprocess
 import platform
 import shutil
-from StringIO import StringIO
+PY3 = sys.version[0]=='3'
+if PY3:
+    from io import StringIO
+else:
+    from StringIO import StringIO
 from xml.dom import minidom
-
 from distutils import dir_util
 from time import sleep
+from . import killableprocess
 
 # conditional (version-dependent) imports
 try:
@@ -28,6 +35,9 @@ except ImportError:
 
 import logging
 logger = logging.getLogger(__name__)
+
+if PY3:
+    basestring = (str, bytes)
 
 # Use dir_util for copy/rm operations because shutil is all kinds of broken
 copytree = dir_util.copy_tree
@@ -70,7 +80,7 @@ def getoutput(l):
 def get_pids(name, minimun_pid=0):
     """Get all the pids matching name, exclude any pids below minimum_pid."""
     if os.name == 'nt' or sys.platform == 'cygwin':
-        import wpk
+        from . import wpk
 
         pids = wpk.get_pids(name)
 
@@ -89,7 +99,7 @@ def makedirs(name):
     if head and tail and not os.path.exists(head):
         try:
             makedirs(head)
-        except OSError, e:
+        except OSError as e:
             pass
         if tail == os.curdir:           # xxx/newdir/. exists if xxx/newdir exists
             return
@@ -146,7 +156,7 @@ def addon_details(install_rdf_fh):
     for node in description.childNodes:
         # Remove the namespace prefix from the tag for comparison
         entry = node.nodeName.replace(em, "")
-        if entry in details.keys():
+        if entry in list(details.keys()):
             details.update({ entry: get_text(node) })
 
     # turn unpack into a true/false value
@@ -260,13 +270,13 @@ class Profile(object):
         # our magic markers
         delimeters = ('#MozRunner Prefs Start', '#MozRunner Prefs End')
 
-        lines = file(os.path.join(self.profile, 'user.js')).read().splitlines()
+        lines = open(os.path.join(self.profile, 'user.js')).read().splitlines()
         def last_index(_list, value):
             """
             returns the last index of an item;
             this should actually be part of python code but it isn't
             """
-            for index in reversed(range(len(_list))):
+            for index in reversed(list(range(len(_list)))):
                 if _list[index] == value:
                     return index
         s = last_index(lines, delimeters[0])
@@ -280,11 +290,11 @@ class Profile(object):
             assert e is None, '%s found without %s' % (delimeters[0], delimeters[1])
 
         # ensure the markers are in the proper order
-        assert e > s, '%s found at %s, while %s found at %s' (delimeter[1], e, delimeter[0], s)
+        assert e > s, '%s found at %s, while %s found at %s' (delimeters[1], e, delimeters[0], s)
 
         # write the prefs
         cleaned_prefs = '\n'.join(lines[:s] + lines[e+1:])
-        f = file(os.path.join(self.profile, 'user.js'), 'w')
+        f = open(os.path.join(self.profile, 'user.js'), 'w')
         f.write(cleaned_prefs)
         f.close()
         return True
@@ -305,7 +315,7 @@ class Profile(object):
         """Cleanup operations on the profile."""
         def oncleanup_error(function, path, excinfo):
             #TODO: How should we handle this?
-            print "Error Cleaning up: " + str(excinfo[1])
+            print("Error Cleaning up: " + str(excinfo[1]))
         if self.create_new:
             shutil.rmtree(self.profile, False, oncleanup_error)
         else:
@@ -414,33 +424,36 @@ class Runner(object):
 
             # find the default executable from the windows registry
             try:
-                import _winreg
+                if PY3:
+                    import winreg
+                else:
+                    import _winreg as winreg
             except ImportError:
                 pass
             else:
                 sam_flags = [0]
                 # KEY_WOW64_32KEY etc only appeared in 2.6+, but that's OK as
                 # only 2.6+ has functioning 64bit builds.
-                if hasattr(_winreg, "KEY_WOW64_32KEY"):
+                if hasattr(winreg, "KEY_WOW64_32KEY"):
                     if "64 bit" in sys.version:
                         # a 64bit Python should also look in the 32bit registry
-                        sam_flags.append(_winreg.KEY_WOW64_32KEY)
+                        sam_flags.append(winreg.KEY_WOW64_32KEY)
                     else:
                         # possibly a 32bit Python on 64bit Windows, so look in
                         # the 64bit registry incase there is a 64bit app.
-                        sam_flags.append(_winreg.KEY_WOW64_64KEY)
+                        sam_flags.append(winreg.KEY_WOW64_64KEY)
                 for sam_flag in sam_flags:
                     try:
                         # assumes self.app_name is defined, as it should be for
                         # implementors
                         keyname = r"Software\Mozilla\Mozilla %s" % self.app_name
-                        sam = _winreg.KEY_READ | sam_flag
-                        app_key = _winreg.OpenKey(_winreg.HKEY_LOCAL_MACHINE, keyname, 0, sam)
-                        version, _type = _winreg.QueryValueEx(app_key, "CurrentVersion")
-                        version_key = _winreg.OpenKey(app_key, version + r"\Main")
-                        path, _ = _winreg.QueryValueEx(version_key, "PathToExe")
+                        sam = winreg.KEY_READ | sam_flag
+                        app_key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, keyname, 0, sam)
+                        version, _type = winreg.QueryValueEx(app_key, "CurrentVersion")
+                        version_key = winreg.OpenKey(app_key, version + r"\Main")
+                        path, _ = winreg.QueryValueEx(version_key, "PathToExe")
                         return path
-                    except _winreg.error:
+                    except winreg.error:
                         pass
 
             # search for the binary in the path            
@@ -505,9 +518,12 @@ class Runner(object):
 
     def get_repositoryInfo(self):
         """Read repository information from application.ini and platform.ini."""
-        import ConfigParser
+        if PY3:
+            import configparser
+        else:
+            import ConfigParser as configparser
 
-        config = ConfigParser.RawConfigParser()
+        config = configparser.RawConfigParser()
         dirname = os.path.dirname(self.binary)
         repository = { }
 
@@ -556,7 +572,7 @@ class Runner(object):
                 # after killing processes.  Let's try that.
                 # TODO: Bug 640047 is invesitgating the correct way to handle this case
                 self.process_handler.wait(timeout=10)
-            except Exception, e:
+            except Exception as e:
                 logger.error('Cannot kill process, '+type(e).__name__+' '+e.message)
 
     def stop(self):
@@ -622,7 +638,7 @@ class CLI(object):
         """ Setup command line parser and parse arguments """
         self.metadata = self.get_metadata_from_egg()
         self.parser = optparse.OptionParser(version="%prog " + self.metadata["Version"])
-        for names, opts in self.parser_options.items():
+        for names, opts in list(self.parser_options.items()):
             self.parser.add_option(*names, **opts)
         (self.options, self.args) = self.parser.parse_args()
 
@@ -652,7 +668,7 @@ class CLI(object):
                                    "Author", "Author-email", "License", "Platform", "Dependencies")):
         for key in data:
             if key in self.metadata:
-                print key + ": " + self.metadata[key]
+                print(key + ": " + self.metadata[key])
 
     def create_runner(self):
         """ Get the runner object """
@@ -683,7 +699,7 @@ class CLI(object):
         """Starts the runner and waits for Firefox to exitor Keyboard Interrupt.
         Shoule be overwritten to provide custom running of the runner instance."""
         runner.start()
-        print 'Started:', ' '.join(runner.command)
+        print('Started:', ' '.join(runner.command))
         try:
             runner.wait()
         except KeyboardInterrupt:

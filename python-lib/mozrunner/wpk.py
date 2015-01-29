@@ -2,6 +2,10 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import absolute_import
+
 from ctypes import sizeof, windll, addressof, c_wchar, create_unicode_buffer
 from ctypes.wintypes import DWORD, HANDLE
 
@@ -77,4 +81,4 @@ if __name__ == '__main__':
     if len(newest_pids) != 0:
         raise Exception('kill_pid() is malfunctioning')
 
-    print "Test passed."
+    print("Test passed.")

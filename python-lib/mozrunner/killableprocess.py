@@ -47,13 +47,23 @@ Windows 95, 98, or NT 4.0). It also requires ctypes, which is bundled with
 Python 2.5+ or available from http://python.net/crew/theller/ctypes/
 """
 
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import absolute_import
+
 import subprocess
 import sys
 import os
 import time
 import datetime
 import types
-import exceptions
+# import exceptions #refactored codes like 'exceptions.OSError' to just 'OSError'.
+
+PY3 = sys.version[0]=='3'
+if PY3:
+    strint_types = str
+else:
+    strint_types = types.StringTypes
 
 try:
     from subprocess import CalledProcessError
@@ -72,7 +82,7 @@ except ImportError:
 mswindows = (sys.platform == "win32")
 
 if mswindows:
-    import winprocess
+    from . import winprocess
 else:
     import signal
 
@@ -124,7 +134,7 @@ class Popen(subprocess.Popen):
                     c2pread, c2pwrite,
                     errread, errwrite) = args_tuple
 
-            if not isinstance(args, types.StringTypes):
+            if not isinstance(args, strint_types):
                 args = subprocess.list2cmdline(args)
 
             # Always or in the create new process group
@@ -274,7 +284,7 @@ class Popen(subprocess.Popen):
                 def group_wait(timeout):
                     try:
                         os.waitpid(self.pid, 0)
-                    except OSError, e:
+                    except OSError as e:
                         pass # If wait has already been called on this pid, bad things happen
                     return self.returncode
             elif sys.platform == 'darwin':
@@ -290,7 +300,7 @@ class Popen(subprocess.Popen):
                             os.killpg(self.pid, signal.SIG_DFL)
                             # count is increased by 500ms for every 0.5s of sleep
                             time.sleep(.5); count += 500
-                    except exceptions.OSError:
+                    except OSError:
                         return self.returncode
                         
             if timeout is None:

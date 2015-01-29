@@ -2,8 +2,17 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import absolute_import
 from ctypes import c_void_p, POINTER, sizeof, Structure, windll, WinError, WINFUNCTYPE, addressof, c_size_t, c_ulong
 from ctypes.wintypes import BOOL, BYTE, DWORD, HANDLE, LARGE_INTEGER
+
+import sys
+
+PY3 = sys.version[0]=='3'
+if PY3:
+    basestring = (str, bytes)
 
 LPVOID = c_void_p
 LPDWORD = POINTER(DWORD)
@@ -135,20 +144,20 @@ def QueryInformationJobObject(hJob, JobObjectInfoClass):
     return SubscriptableReadOnlyStruct(jobinfo.info)
 
 def test_qijo():
-    from killableprocess import Popen
+    from .killableprocess import Popen
 
     popen = Popen('c:\\windows\\notepad.exe')
 
     try:
         result = QueryInformationJobObject(0, 8)
         raise AssertionError('throw should occur')
-    except WindowsError, e:
+    except WindowsError as e:
         pass
 
     try:
         result = QueryInformationJobObject(0, 1)
         raise AssertionError('throw should occur')
-    except NotImplementedError, e:
+    except NotImplementedError as e:
         pass
 
     result = QueryInformationJobObject(popen._job, 8)
@@ -161,6 +170,6 @@ def test_qijo():
         raise AssertionError('expected ActiveProcesses to be 0')
 
 if __name__ == '__main__':
-    print "testing."
+    print("testing.")
     test_qijo()
-    print "success!"
+    print("success!")
