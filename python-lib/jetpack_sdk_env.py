@@ -2,6 +2,10 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import absolute_import
+
 import sys
 import os
 
@@ -12,13 +16,14 @@ def welcome():
     """
 
     try:
-        if sys.version_info[0] > 2:
-            print ("Error: You appear to be using Python %d, but "
-                   "the Add-on SDK only supports the Python 2.x line." %
-                   (sys.version_info[0]))
-            return
+        # Python3 comparison added
+        # if sys.version_info[0] > 2:
+        #     print ("Error: You appear to be using Python %d, but "
+        #            "the Add-on SDK only supports the Python 2.x line." %
+        #            (sys.version_info[0]))
+        #     return
 
-        import mozrunner
+        from . import mozrunner
 
         if 'CUDDLEFISH_ROOT' not in os.environ:
             print ("Error: CUDDLEFISH_ROOT environment variable does "
