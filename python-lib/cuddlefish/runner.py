@@ -210,11 +210,11 @@ class RemoteFennecRunner(mozrunner.Runner):
                 remoteFile = "/".join(remoteFile.split(os.sep))
                 subprocess.Popen([self._adb_path, "push", localFile, remoteFile],
                                  stderr=subprocess.PIPE).wait()
-            for dir in dirs:
+            for dir_ in dirs:
                 targetDir = remoteDir.replace("/", os.sep)
                 if relRoot != ".":
                     targetDir = os.path.join(targetDir, relRoot)
-                targetDir = os.path.join(targetDir, dir)
+                targetDir = os.path.join(targetDir, dir_)
                 targetDir = "/".join(targetDir.split(os.sep))
                 # `-p` option is not supported on all devices!
                 subprocess.call([self._adb_path, "shell", "mkdir " + targetDir])
@@ -555,7 +555,7 @@ def run_app(harness_root_dir, manifest_rdf, harness_options,
     if is_running_tests:
         overloads["tests"] = os.path.join(env_root, "test")
 
-    set_overloaded_modules(env_root, app_type, harness_options["jetpackID"], \
+    set_overloaded_modules(env_root, app_type, harness_options["jetpackID"],
                            preferences, overloads)
 
     # the XPI file is copied into the profile here
@@ -574,8 +574,7 @@ def run_app(harness_root_dir, manifest_rdf, harness_options,
     if app_type == "fennec-on-device":
         profile_path = profile.profile
         for name, path in list(overloads.items()):
-            shutil.copytree(path, \
-                os.path.join(profile_path, "overloads", name))
+            shutil.copytree(path, os.path.join(profile_path, "overloads", name))
 
     runner = runner_class(profile=profile,
                           binary=binary,

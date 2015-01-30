@@ -99,30 +99,30 @@ class RDFManifest(RDF):
     def __init__(self, path):
         self.dom = xml.dom.minidom.parse(path)
 
-    def set(self, property, value):
-        elements = self.dom.documentElement.getElementsByTagName(property)
+    def set(self, _property, value):
+        elements = self.dom.documentElement.getElementsByTagName(_property)
         if not elements:
-            raise ValueError("Element with value not found: %s" % property)
+            raise ValueError("Element with value not found: %s" % _property)
         if not elements[0].firstChild:
             elements[0].appendChild(self.dom.createTextNode(value))
         else:
             elements[0].firstChild.nodeValue = value
 
-    def get(self, property, default=None):
-        elements = self.dom.documentElement.getElementsByTagName(property)
+    def get(self, _property, default=None):
+        elements = self.dom.documentElement.getElementsByTagName(_property)
         if not elements:
             return default
         return elements[0].firstChild.nodeValue
 
-    def remove(self, property):
-        elements = self.dom.documentElement.getElementsByTagName(property)
+    def remove(self, _property):
+        elements = self.dom.documentElement.getElementsByTagName(_property)
         if not elements:
             return True
         else:
             for i in elements:
-                i.parentNode.removeChild(i);
+                i.parentNode.removeChild(i)
 
-        return True;
+        return True
 
 def gen_manifest(template_root_dir, target_cfg, jid,
                  update_url=None, bootstrap=True, enable_mobile=False):
@@ -146,17 +146,17 @@ def gen_manifest(template_root_dir, target_cfg, jid,
     manifest.set("em:unpack", "true" if target_cfg.get("unpack") else "false")
 
     for translator in target_cfg.get("translators", [ ]):
-        elem = dom.createElement("em:translator");
+        elem = dom.createElement("em:translator")
         elem.appendChild(dom.createTextNode(translator))
         dom.documentElement.getElementsByTagName("Description")[0].appendChild(elem)
 
     for developer in target_cfg.get("developers", [ ]):
-        elem = dom.createElement("em:developer");
+        elem = dom.createElement("em:developer")
         elem.appendChild(dom.createTextNode(developer))
         dom.documentElement.getElementsByTagName("Description")[0].appendChild(elem)
 
     for contributor in target_cfg.get("contributors", [ ]):
-        elem = dom.createElement("em:contributor");
+        elem = dom.createElement("em:contributor")
         elem.appendChild(dom.createTextNode(contributor))
         dom.documentElement.getElementsByTagName("Description")[0].appendChild(elem)
 

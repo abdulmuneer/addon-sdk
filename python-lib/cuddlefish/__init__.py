@@ -613,7 +613,7 @@ def run(arguments=sys.argv[1:], target_cfg=None, pkg_cfg=None,
 
     (options, args) = parse_args(**parser_kwargs)
 
-    config_args = get_config_args(options.config, env_root);
+    config_args = get_config_args(options.config, env_root)
 
     # reparse configs with arguments from local.json
     if config_args:

@@ -1,3 +1,6 @@
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import absolute_import
 
 # This file helps to compute a version number in source trees obtained from
 # git-archive tarball (such as those provided by githubs download-from-tag
@@ -16,12 +19,6 @@ import sys
 import re
 import os.path
 import subprocess
-
-
-
-from __future__ import print_function
-from __future__ import unicode_literals
-from __future__ import absolute_import
 
 def run_command(args, cwd=None, verbose=False):
     try:

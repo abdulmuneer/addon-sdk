@@ -268,9 +268,9 @@ def normpath(path):
     return path.replace(os.path.sep, '/')
 
 def document_zip_file(path):
-    zip = zipfile.ZipFile(path, 'r')
-    for name in sorted(zip.namelist()):
-        contents = zip.read(name)
+    zip_ = zipfile.ZipFile(path, 'r')
+    for name in sorted(zip_.namelist()):
+        contents = zip_.read(name)
         lines = contents.splitlines()
         if len(lines) == 1 and name.endswith('.json') and len(lines[0]) > 75:
             # Ideally we would json-decode this, but it results
@@ -281,7 +281,7 @@ def document_zip_file(path):
             lines = contents.splitlines()
         contents = "\n  ".join(lines)
         print("%s:\n  %s" % (normpath(name), contents) )
-    zip.close()
+    zip_.close()
 
 def document_dir_files(path):
     filename_contents_tuples = []

@@ -115,7 +115,7 @@ class Basic(unittest.TestCase):
         m = manifest.build_manifest(target_cfg, pkg_cfg, deps, scan_tests=False)
         m = m.get_harness_options_manifest(False)
         reqs = m["five/main"]["requirements"]
-        self.failUnlessEqual(reqs, {});
+        self.failUnlessEqual(reqs, {})
 
     def test_unreachable_relative_main_in_top(self):
         target_cfg = self.get_pkg("six")

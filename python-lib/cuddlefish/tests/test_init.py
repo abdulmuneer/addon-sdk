@@ -209,7 +209,7 @@ class TestCfxQuits(unittest.TestCase):
     def test_cfx_xpi(self):
         addon_path = os.path.join(tests_path,
                                   "addons", "simplest-test")
-        rc, out, err = self.run_cfx(addon_path, \
+        rc, out, err = self.run_cfx(addon_path,
           ["xpi", "--manifest-overload", "manifest-overload.json"])
         self.assertEqual(rc, 0)
         # Ensure that the addon version from our manifest overload is used
